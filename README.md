@@ -1,6 +1,6 @@
 # Applying Probabilistic Programming to Affective Computing
 
-This code repository contains exapmle code to accompany "Applying Probabilistic Programming to Affective Computing" by Desmond C. Ong, Harold Soh, Jamil Zaki, and Noah D. Goodman (submitted).
+This code repository contains example code to accompany "Applying Probabilistic Programming to Affective Computing" by Desmond C. Ong, Harold Soh, Jamil Zaki, and Noah D. Goodman (submitted).
 
 
 

@@ -1,7 +1,7 @@
 # Getting Started
 
-The code is this repository is provided in Jupyter notebooks.
-In order to use them cleanly, we are going to install a virtual environment, so that you can keep all your python packages neatly contained for this project.
+The code in this repository is provided in Jupyter notebooks.
+In order to use them, we are going to install a virtual environment, so that you can keep all your python packages neatly contained for this project.
 Install python, [pip](https://pip.pypa.io/en/stable/installing/), and [virtualenv](https://virtualenv.pypa.io/en/stable/installation/) if you have not already.
 
 First, clone the git repository:
