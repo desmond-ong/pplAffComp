@@ -4,7 +4,7 @@ This code repository contains example code to accompany "Applying Probabilistic 
 
 
 
-*This repo is still under constructions, and we aim to have it ready by June 24, 2018.*
+*This repo is still under construction, and we aim to have it ready by June 24, 2018.*
 
 
 - [Getting Started](gettingStarted.md)
