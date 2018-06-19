@@ -8,9 +8,9 @@ This code repository contains example code to accompany "Applying Probabilistic 
 
 
 - [Getting Started](gettingStarted.md)
-- [Introduction to Probabilistic Programming for Affective Computing](LINK) (Under construction! Will be up soon)
+- [Introduction to Probabilistic Programming](LINK) (Under construction! Will be up soon)
 - [Example 1: Linear Regression](code/LinearRegression.ipynb) as a model of Appraisal.
-- [Example 2: Semisupervised VAE](LINK) to learn to recognize faces (Under construction! Will be up soon)
+- [Example 2: Semi-supervised VAE](code/SemiSupervisedVAE.ipynb) to learn to recognize emotions from faces (Under construction! Will be up soon)
 - [Example 3: Multimodal VAE](LINK) to model latent affect (Under construction! Will be up soon)
 
 
