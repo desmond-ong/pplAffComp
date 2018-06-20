@@ -9,6 +9,8 @@ This code repository contains example code to accompany "Applying Probabilistic 
 
 - [Getting Started](gettingStarted.md)
 - [Introduction to Probabilistic Programming](LINK) (Under construction! Will be up soon)
+    - Intro to Pyro [Part 1](http://pyro.ai/examples/intro_part_i.html) and [Part 2](http://pyro.ai/examples/intro_part_ii.html). 
+    - [Intro to Variational Inference](http://pyro.ai/examples/svi_part_i.html)
 - [Example 1: Linear Regression](code/LinearRegression.ipynb) as a model of Appraisal.
 - [Example 2: Semi-supervised VAE](code/SemiSupervisedVAE.ipynb) to learn to recognize emotions from faces (Under construction! Will be up soon)
 - [Example 3: Multimodal VAE](LINK) to model latent affect (Under construction! Will be up soon)
