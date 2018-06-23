@@ -4,7 +4,7 @@ The code in this repository is provided in Jupyter notebooks.
 In order to use them, we are going to install a virtual environment, so that you can keep all your python packages neatly contained for this project.
 Install python, [pip](https://pip.pypa.io/en/stable/installing/), and [virtualenv](https://virtualenv.pypa.io/en/stable/installation/) if you have not already.
 
-First, clone the git repository:
+First, open up the command prompt/Terminal and clone the git repository:
 
 `git clone https://github.com/desmond-ong/pplAffComp.git`
 
@@ -22,6 +22,17 @@ Virtualenv will now install a little python virtual environment. Next, we are go
 
 
 `pip install -r requirements.txt`
+
+[To test if Pyro has been installed properly, start a Python shell by typing:
+
+`python`
+
+And when the python prompt opens, type:
+
+`import pyro`
+
+If it doesn't throw an error, then Pyro has been installed properly. Type `quit()` to return to the command prompt.]
+
 
 Now you should be able to use Jupyter (and it'll automatically detect the python kernel in the virtualenv). Type:
 
