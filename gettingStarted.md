@@ -17,15 +17,22 @@ virtualenv env
 
 Virtualenv will now install a little python virtual environment. Next, we are going to activate the virtual environment:
 
-`source env/bin/activate`
+```
+source env/bin/activate
+```
 
 You should see `(env)` before your command prompt to indicate that you are working in a virtual environment. 
 
 To install the required packages:
 
-`pip install -r requirements.txt`
+```
+pip install -r requirements.txt
+```
 
 --- 
+
+# Installing Pyro
+
 At the current time of writing, the latest release of Pyro is 0.2.1. However, the tutorial uses features in the [/dev branch](https://github.com/uber/pyro) (i.e., the development version of Pyro which may become a later release), so we will be installing Pyro directly from dev.
 
 Make sure you have your environment activated, then type:
@@ -38,27 +45,31 @@ pip install .
 
 To test if Pyro has been installed properly, start a Python shell by typing:
 
-`python`
+```
+python
+import pyro
+```
 
-And when the python prompt opens, type:
-
-`import pyro`
-
-If it doesn't throw an error, then Pyro has been installed properly. Type `quit()` to return to the command prompt.
+If it doesn't throw an error, then Pyro has been installed properly. Type ```quit()``` to return to the command prompt.
 
 ---
 
+# Starting a Jupyter notebook and trying the examples
 
 Now you should be able to use Jupyter (and it'll automatically detect the python kernel in the virtualenv). Type:
 
-`jupyter notebook`
+```
+jupyter notebook
+```
 
-And it should open a new browser window. You can then navigate to the various examples to get started!
+And it should open a new browser window. You can then navigate to the various examples in code/ to get started!
 
 
 Once you're done and wish to deactivate the virtualenv, simply type:
 
-`deactivate`
+```
+deactivate
+```
 
 and you should see the `(env)` disappear.
 
