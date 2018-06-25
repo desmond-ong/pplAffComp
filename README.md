@@ -3,17 +3,20 @@
 This code repository contains example code to accompany "Applying Probabilistic Programming to Affective Computing" by Desmond C. Ong, Harold Soh, Jamil Zaki, and Noah D. Goodman (submitted).
 
 
-
-*This repo is still under construction, and we aim to have it ready by June 24, 2018.*
-
-
 - [Getting Started](gettingStarted.md)
-- [Introduction to Probabilistic Programming](LINK) (Under construction! Will be up soon)
+- Introduction to Probabilistic Programming
     - Intro to Pyro [Part 1](http://pyro.ai/examples/intro_part_i.html) and [Part 2](http://pyro.ai/examples/intro_part_ii.html). 
     - [Intro to Variational Inference](http://pyro.ai/examples/svi_part_i.html)
+- Rational Speech Acts examples: 
+    - [Implicature](code/RSA-implicature.ipynb) 
+    - [Hyperbole](code/RSA-hyperbole.ipynb)
+
+Affective Computing relevant examples:
+
 - [Example 1: Linear Regression](code/LinearRegression.ipynb) as a model of Appraisal.
-- [Example 2: Semi-supervised VAE](code/SemiSupervisedVAE.ipynb) to learn to recognize emotions from faces (Under construction! Will be up soon)
-- [Example 3: Multimodal VAE](LINK) to model latent affect (Under construction! Will be up soon)
+- [Example 2: Variational Autoencoder](code/VAE.ipynb) to generate emotional faces
+- [Example 3: Semi-supervised VAE](code/SemiSupervisedVAE.ipynb) to learn to recognize emotions from faces
+- Example 4: Multimodal VAE to model latent affect (Under construction! Will be up soon)
 
 
 ---
