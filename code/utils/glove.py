@@ -8,10 +8,7 @@ def normalize(v):
     return v / norm
 
 def cosine_sim_np(a, b):
-    if normalize_embeddings:
-        return np.dot(a, b)
-    else:
-        return np.dot(normalize(a), normalize(b))
+    return np.dot(normalize(a), normalize(b))
 
 def cosine_sim_torch(a, b):
     a_norm = a / a.norm()

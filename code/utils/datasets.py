@@ -2,15 +2,26 @@ import os
 import numpy as np
 import pandas as pd
 import torch
+from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 
-FACE_IMG_DIR = os.path.join(os.path.abspath('..'), "CognitionData", "faces")
-FACE_OUTCOME_EMOTION_PATH = os.path.join(os.path.abspath('../..'),
+UTILS_DIR = os.path.dirname(os.path.abspath(__file__))
+FACE_IMG_DIR = os.path.join(UTILS_DIR, "..", "..", "CognitionData", "faces")
+FACE_OUTCOME_EMOTION_PATH = os.path.join(UTILS_DIR, "..", "..",
                                          "CognitionData", "data_faceWheel.csv")
-WORD_OUTCOME_EMOTION_PATH = os.path.join(os.path.abspath("../.."),
+WORD_OUTCOME_EMOTION_PATH = os.path.join(UTILS_DIR, "..", "..",
                                          "CognitionData",
                                          "dataSecondExpt_utteranceWheel.csv")
- 
+
+OUTCOME_VAR_NAMES = ['payoff1', 'payoff2', 'payoff3', 
+                     'prob1', 'prob2', 'prob3', 
+                     'win', 'winProb', 'angleProp']
+EMOTION_VAR_NAMES = ['happy', 'sad', 'anger', 'surprise', 
+                     'disgust', 'fear', 'content', 'disapp']
+
+OUTCOME_VAR_DIM = len(OUTCOME_VAR_NAMES)
+EMOTION_VAR_DIM = len(EMOTION_VAR_NAMES)
+
 class MultimodalDataset(Dataset):
     """A multimodal experimental dataset."""
     
@@ -123,10 +134,6 @@ def load_face_outcome_emotion_data(batch_size,
         transforms.CenterCrop(64),
         transforms.ToTensor()
         ])
-
-    # Data location
-    img_dir =\
-    csv_file =\
 
     # Reads in datafiles
     dataset = MultimodalDataset(csv_file=csv_file, img_dir=img_dir,

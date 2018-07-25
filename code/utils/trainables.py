@@ -18,15 +18,7 @@ from glove import load_embeddings
 from datasets import *
 from mvae import MVAE
 
-OUTCOME_VAR_NAMES = ['payoff1', 'payoff2', 'payoff3', 
-                     'prob1', 'prob2', 'prob3', 
-                     'win', 'winProb', 'angleProp']
-EMOTION_VAR_NAMES = ['happy', 'sad', 'anger', 'surprise', 
-                     'disgust', 'fear', 'content', 'disapp']
-
-OUTCOME_VAR_DIM = len(OUTCOME_VAR_NAMES)
-EMOTION_VAR_DIM = len(EMOTION_VAR_NAMES)
-EMBED_DIM = 50
+DEFALUT_EMBED_DIM = 50
 IMG_WIDTH = 64
 
 class MVAETrainable(tune.Trainable):
@@ -37,7 +29,7 @@ class MVAETrainable(tune.Trainable):
         # Load the data
         if self.config['dataset'] == "face":
             self.embeddings = None
-            self.config['embed_dim'] = EMBED_DIM
+            self.config['embed_dim'] = DEFAULT_EMBED_DIM
             self.dataset, self.loader =\
                 load_face_outcome_emotion_data(self.config['batch_size'])
         elif self.config['dataset'] == "word":
@@ -54,7 +46,7 @@ class MVAETrainable(tune.Trainable):
                          outcome_dim=OUTCOME_VAR_DIM,
                          use_cuda=self.config['use_cuda'],)
         # Setup the optimizer
-        optimizer = Adam(lr=self.config['lr'])
+        optimizer = Adam({'lr': self.config['lr']})
         # Setup the inference algorithm
         self.svi = SVI(self.mvae.model, self.mvae.guide,
                        optimizer, loss=Trace_ELBO())
@@ -63,7 +55,7 @@ class MVAETrainable(tune.Trainable):
         # Initialize loss accumulator
         epoch_loss = 0.
         # Do a training epoch over each mini-batch
-        for (batch_num, batch_data in enumerate(self.loader)):
+        for batch_num, batch_data in enumerate(self.loader):
             # Discard the word string
             batch_data = list(batch_data[1:])
             for i in range(len(batch_data)):

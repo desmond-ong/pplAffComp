@@ -152,7 +152,7 @@ class MVAE(nn.Module):
                 outcome_prior_loc = torch.zeros(\
                         torch.Size((batch_size, self.outcome_dim)))
                 outcome_prior_scale = torch.ones(\
-                        torch.Size((batch_size, self.outcome_dim))
+                        torch.Size((batch_size, self.outcome_dim)))
                 pyro.sample("obs_outcome",
                             dist.Normal(outcome_prior_loc,
                                         outcome_prior_scale).independent(1),

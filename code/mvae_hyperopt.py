@@ -1,5 +1,6 @@
 """Uses population based training to tune hyperparameters."""
 
+import os
 import ray
 from ray.tune import register_trainable, run_experiments, grid_search
 
