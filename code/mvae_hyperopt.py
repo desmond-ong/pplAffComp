@@ -1,16 +1,18 @@
 """Uses population based training to tune hyperparameters."""
 
 import os
+import torch
 import ray
 from ray.tune import register_trainable, run_experiments, grid_search
 
 from utils.trainables import MVAETrainable
 
-USE_CUDA = False
+NUM_GPUS = int(torch.cuda.device_count())
+USE_CUDA = torch.cuda.is_available()
 EMBED_PATH = os.path.join(os.path.abspath('..'), "glove", "glove.6B.50d.txt")
 
 if __name__ == "__main__":
-    ray.init()
+    ray.init(num_gpus=NUM_GPUS)
     register_trainable("mvae_trainable", MVAETrainable)
     # Use population based training to tune hyperparameters
     run_experiments(
@@ -29,5 +31,7 @@ if __name__ == "__main__":
                 "embed_path": EMBED_PATH,
                 "normalize_embeddings": False
             },
+            "trial_resources": {"cpu": 2, "gpu": 1}
         }
-    })
+    },
+    verbose=False)

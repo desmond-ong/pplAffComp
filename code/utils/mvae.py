@@ -59,6 +59,15 @@ class MVAE(nn.Module):
         # using GPUs for faster training of the networks
         if self.use_cuda:
             self.cuda()
+            self.image_encoder.cuda()
+            self.image_decoder.cuda()
+            self.word_encoder.cuda()
+            self.word_decoder.cuda()
+            self.rating_encoder.cuda()
+            self.rating_decoder.cuda()
+            self.outcome_encoder.cuda()
+            self.outcome_decoder.cuda()
+            self.experts.cuda()
 
     def prior_expert(self, size, use_cuda=False):
          """Universal prior expert. Here we use a spherical
@@ -153,6 +162,10 @@ class MVAE(nn.Module):
                         torch.Size((batch_size, self.outcome_dim)))
                 outcome_prior_scale = torch.ones(\
                         torch.Size((batch_size, self.outcome_dim)))
+                if self.use_cuda:
+                    outcome_prior_loc = outcome_prior_loc.cuda()
+                    outcome_prior_scale = outcome_prior_scale.cuda()
+
                 pyro.sample("obs_outcome",
                             dist.Normal(outcome_prior_loc,
                                         outcome_prior_scale).independent(1),
@@ -163,6 +176,8 @@ class MVAE(nn.Module):
                 # setup hyperparameters for prior p(z)
                 z_loc = torch.zeros(torch.Size((batch_size, self.z_dim)))
                 z_scale = torch.ones(torch.Size((batch_size, self.z_dim)))
+                if self.use_cuda:
+                    z_loc, z_scale = z_loc.cuda(), z_scale.cuda()
             
             # sample from prior
             # (value will be sampled by guide when computing the ELBO)
