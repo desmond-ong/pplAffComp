@@ -64,7 +64,7 @@ class MVAETrainable(tune.Trainable):
                     batch_data[i] = None
                 elif self.config['use_cuda']:
                     # Store in CUDA memory
-                    batch_data[i].cuda()
+                    batch_data[i] = batch_data[i].cuda()
             # Run SVI optimization step
             epoch_loss += self.svi.step(*batch_data)
         # Report training diagnostics

@@ -139,7 +139,7 @@ def load_face_outcome_emotion_data(batch_size,
     dataset = MultimodalDataset(csv_file=csv_file, img_dir=img_dir,
                                 transform=img_transform)
     loader = DataLoader(dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=4)
+                        shuffle=True, num_workers=4, pin_memory=True)
 
     return dataset, loader
 
@@ -148,6 +148,6 @@ def load_word_outcome_emotion_data(batch_size, embeddings,
     # Read in datafiles
     dataset = MultimodalDataset(csv_file=csv_file, embeddings=embeddings)
     loader = DataLoader(dataset, batch_size=batch_size,
-                        shuffle=True, num_workers=4)
+                        shuffle=True, num_workers=4, pin_memory=True)
 
     return dataset, loader
