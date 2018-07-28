@@ -25,13 +25,14 @@ if __name__ == "__main__":
             "config": {
                 "dataset": "word",
                 "batch_size": 32,
-                "lr": grid_search([5e-5, 1e-5, 5e-6, 1e-6]),
-                "z_dim": grid_search(range(10,51,5)),
+                "lr": grid_search([1e-4, 5e-5]),
+                "z_dim": grid_search(range(10,31,5)),
                 "use_cuda": USE_CUDA,
                 "embed_path": EMBED_PATH,
                 "normalize_embeddings": False
             },
-            "trial_resources": {"cpu": 2, "gpu": 1}
+            "trial_resources": {"cpu": 2, "gpu": 1},
+            "checkpoint_freq": 1000,
         }
     },
     verbose=False)

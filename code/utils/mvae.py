@@ -69,7 +69,7 @@ class MVAE(nn.Module):
             self.lambdas["word"] = 1.0
         if "rating" not in self.lambdas:
             self.lambdas["rating"] = 50.0
-         if "outcome" not in self.lambdas:
+        if "outcome" not in self.lambdas:
             self.lambdas["outcome"] = 100.0
        
         # using GPUs for faster training of the networks
@@ -171,7 +171,7 @@ class MVAE(nn.Module):
             # score against actual words
             if words is not None:
                 with poutine.scale(scale=self.lambdas["word"]):
-                    pyro.sample("obs_word", word_dist
+                    pyro.sample("obs_word", word_dist,
                                 obs=words.reshape(-1, self.embed_dim))
             
             img_loc = self.image_decoder.forward(z)
@@ -188,7 +188,7 @@ class MVAE(nn.Module):
             # score against actual ratings
             if ratings is not None:
                 with poutine.scale(scale=self.lambdas["rating"]):
-                    pyro.sample("obs_rating", rating_dist
+                    pyro.sample("obs_rating", rating_dist,
                                 obs=ratings.reshape(-1, self.rating_dim))
 
             outcome_loc, outcome_scale = self.outcome_decoder.forward(z)

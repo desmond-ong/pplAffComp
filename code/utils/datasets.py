@@ -2,16 +2,22 @@ import os
 import numpy as np
 import pandas as pd
 import torch
-from torchvision import transforms
+from torchvision import transforms, datasets
 from torch.utils.data import Dataset, DataLoader
 
 UTILS_DIR = os.path.dirname(os.path.abspath(__file__))
-FACE_IMG_DIR = os.path.join(UTILS_DIR, "..", "..", "CognitionData", "faces")
+FACE_IMG_DIR = os.path.join(UTILS_DIR, "..", "..",
+                            "CognitionData", "faces")
+FACE_ONLY_DIR = os.path.join(UTILS_DIR, "..", "..",
+                             "CognitionData", "more_faces")
+WORD_ONLY_PATH = os.path.join(UTILS_DIR, "..", "..",
+                              "CognitionData", "more_utterances.csv")
 FACE_OUTCOME_EMOTION_PATH = os.path.join(UTILS_DIR, "..", "..",
                                          "CognitionData", "data_faceWheel.csv")
 WORD_OUTCOME_EMOTION_PATH = os.path.join(UTILS_DIR, "..", "..",
                                          "CognitionData",
                                          "dataSecondExpt_utteranceWheel.csv")
+
 
 OUTCOME_VAR_NAMES = ['payoff1', 'payoff2', 'payoff3', 
                      'prob1', 'prob2', 'prob3', 
@@ -25,8 +31,8 @@ EMOTION_VAR_DIM = len(EMOTION_VAR_NAMES)
 class MultimodalDataset(Dataset):
     """A multimodal experimental dataset."""
     
-    def __init__(self, csv_file, embeddings=None, img_dir=None,
-                 transform=None):
+    def __init__(self, csv_file=None, embeddings=None, img_dir=None,
+                 transform=None, img_extension='png'):
         """
         Args:
             csv_file (string): Path to the experiment csv file 
@@ -34,7 +40,10 @@ class MultimodalDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.expdata = pd.read_csv(csv_file)
+        if csv_file is None:
+            self.expdata = pd.DataFrame()
+        else:
+            self.expdata = pd.read_csv(csv_file)
         self.embeddings = embeddings
         self.img_dir = img_dir
         self.transform = transform
@@ -43,13 +52,18 @@ class MultimodalDataset(Dataset):
         self.has_faces = False
         self.has_emotions = False
         self.has_outcomes = False
+
+        self.only_faces = False
+        self.face_paths = []
         
         # Check if dataset has utterances
         if "utterance" in self.expdata.columns and embeddings is not None:
             self.has_utterances = True
         # Check if dataset has face images
-        if "facePath" in self.expdata.columns and img_dir is not None:
+        if "facePath" in self.expdata.columns or img_dir is not None:
             self.has_faces = True
+            if "facePath" not in self.expdata.columns:
+                self.only_faces = True                
         # Check if dataset has emotion ratings
         if set(EMOTION_VAR_NAMES).issubset(self.expdata.columns):
             self.has_emotions = True
@@ -59,6 +73,15 @@ class MultimodalDataset(Dataset):
             self.has_outcomes = True
             self.normalize_outcomes()
 
+        # Load face images from directory
+        if self.only_faces:
+            for root, _, fnames in sorted(os.walk(img_dir)):
+                for fname in sorted(fnames):
+                    if not fname.lower().endswith(img_extension):
+                        continue
+                    path = os.path.join(root, fname)
+                    self.face_paths.append(path)
+            
     def __len__(self):
         return len(self.expdata)
 
@@ -84,9 +107,12 @@ class MultimodalDataset(Dataset):
             embed = 0
         
         if self.has_faces:
-            img_name = os.path.join(self.img_dir,
-                                    self.expdata.iloc[idx]["facePath"]
-                                    + ".png")
+            if self.only_faces:
+                img_name = self.face_paths[idx]
+            else:
+                img_name = os.path.join(self.img_dir,
+                                        self.expdata.iloc[idx]["facePath"]
+                                        + ".png")
             try:
                 image = Image.open(img_name).convert('RGB')
                 if self.transform:
@@ -151,3 +177,18 @@ def load_word_outcome_emotion_data(batch_size, embeddings,
                         shuffle=True, num_workers=4, pin_memory=True)
 
     return dataset, loader
+
+def load_face_only_data(batch_size, faces_dir=FACE_ONLY_DIR):
+    img_transform = transforms.Compose([transforms.ToTensor()])
+    
+    dataset = MultimodalDataset(img_dir=faces_dir, transform=img_transform)
+    loader = DataLoader(dataset, batch_size=batch_size,
+                        shuffle=True, num_workers=4, pin_memory=True)
+
+def load_word_only_data(batch_size, embeddings, csv_file=WORD_ONLY_PATH):
+    img_transform = transforms.Compose([transforms.ToTensor()])
+    
+    dataset = MultimodalDataset(csv_file=WORD_ONLY_PATH, embeddings=embeddings)
+    loader = DataLoader(dataset, batch_size=batch_size,
+                        shuffle=True, num_workers=4, pin_memory=True)
+
