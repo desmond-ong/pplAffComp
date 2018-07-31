@@ -1,6 +1,9 @@
 """Trainables for hyperparameter optimization via Ray Tune."""
 import os
 
+from itertools import cycle
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -17,8 +20,9 @@ import ray.tune as tune
 from glove import load_embeddings
 from datasets import *
 from mvae import MVAE
+from ssvae import SSVAE
 
-DEFALUT_EMBED_DIM = 50
+DEFAULT_EMBED_DIM = 50
 IMG_WIDTH = 64
 
 class MVAETrainable(tune.Trainable):
@@ -83,3 +87,102 @@ class MVAETrainable(tune.Trainable):
     def _restore(self, checkpoint_path):
         pyro.get_param_store().load(checkpoint_path)
         pyro.module("mvae", self.mvae, update_module_params=True)
+
+
+class SSVAETrainable(tune.Trainable):
+    def _setup(self):
+        self.epochs = 0
+        # Clear previous pyro parameters
+        pyro.clear_param_store()
+        # Load the data
+        if self.config['dataset'] == "face":
+            input_size = 100*100*3
+            self.embeddings = None
+            self.config['embed_dim'] = DEFAULT_EMBED_DIM
+            self.sup_dataset, self.sup_loader =\
+                load_face_outcome_emotion_data(self.config['batch_size'])
+            self.unsup_dataset, self.unsup_loader =\
+                load_face_only_data(self.config['batch_size'])
+        elif self.config['dataset'] == "word":
+            self.embeddings, input_size = \
+                load_embeddings(self.config['embed_path'],
+                                self.config['normalize_embeddings'])
+            self.sup_dataset, self.sup_loader =\
+                load_word_outcome_emotion_data(self.config['batch_size'],
+                                               self.embeddings)
+            self.unsup_dataset, self.unsup_loader =\
+                load_word_only_data(self.config['batch_size'],
+                                    self.embeddings)
+        # Setup the SSVAE
+        self.ssvae = SSVAE(output_size=EMOTION_VAR_DIM, input_size=input_size,
+                           z_dim=self.config['z_dim'],
+                           hidden_layers=self.config['hidden_layers'],
+                           use_cuda=self.config['use_cuda'],
+                           aux_loss_multiplier=self.config['aux_loss_mult'])
+        # Setup the optimizer
+        optimizer = Adam({'lr': self.config['lr']})
+        # Setup the inference algorithm
+        self.loss = SVI(self.ssvae.model, self.ssvae.guide,
+                        optimizer, loss=Trace_ELBO())
+        self.aux_loss = SVI(self.ssvae.model_rating, self.ssvae.guide_rating,
+                            optimizer, loss=Trace_ELBO())
+                    
+    def _train(self):
+        # Initialize loss accumulator
+        sup_loss, sup_aux_loss = 0.0, 0.0
+        unsup_loss, unsup_aux_loss = 0.0, 0.0
+        # Setup alternating between supervised and unsupervised examples
+        sup_iter = iter(self.sup_loader)
+        unsup_iter = cycle(self.unsup_loader)
+        # Ratio of unsupervised to supervised batches is unsup_ratio
+        sup_flags = ([True]*len(self.sup_loader) +
+                     [False]*len(self.sup_loader) * self.config['unsup_ratio'])
+        sup_flags = np.random.permutation(sup_flags)
+        # Do a training epoch over each mini-batch
+        for batch_num, is_supervised in enumerate(sup_flags):
+            if is_supervised:
+                batch_data = next(sup_iter)
+            else:
+                batch_data = next(unsup_iter)
+            # Extract the relevant modalities
+            if self.config['dataset'] == "face":
+                xs, ys = batch_data[2], batch_data[3]
+            elif self.config['dataset'] == "word":
+                xs, ys = batch_data[1], batch_data[3]
+            if len(ys.shape) == 1:
+                ys = None
+            if self.config['use_cuda']:
+                # Store in CUDA memory
+                xs = xs.cuda()
+                if ys is not None:
+                    ys = ys.cuda()
+            # Run optimization step
+            if is_supervised:
+                sup_loss += self.loss.step(xs, ys)
+                sup_aux_loss += self.aux_loss.step(xs, ys)
+            else:
+                unsup_loss += self.loss.step(xs)
+                unsup_aux_loss += self.aux_loss.step(xs)
+        # Compute training loss
+        n_sup = len(self.sup_dataset)
+        n_unsup = len(self.sup_dataset) * self.config['unsup_ratio']
+        mean_sup_loss = sup_loss / n_sup
+        mean_sup_aux_loss = sup_aux_loss / n_sup
+        mean_unsup_loss = unsup_loss / n_unsup
+        mean_unsup_aux_loss = unsup_aux_loss / n_unsup
+        mean_loss = (mean_sup_loss +
+                     mean_sup_aux_loss * self.config['aux_loss_mult'] +
+                     mean_unsup_loss * self.config['unsup_ratio'])
+        self.epochs += 1
+        return tune.TrainingResult(mean_loss=mean_loss,
+                                   timesteps_this_iter=1)
+
+    def _save(self, checkpoint_dir):
+        filename = "ssvae_model_epoch_{}.save".format(self.epochs)
+        path = os.path.join(checkpoint_dir, filename) 
+        pyro.get_param_store().save(path)
+        return path
+
+    def _restore(self, checkpoint_path):
+        pyro.get_param_store().load(checkpoint_path)
+        pyro.module("ssvae", self.ssvae, update_module_params=True)

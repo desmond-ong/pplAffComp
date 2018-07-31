@@ -179,11 +179,11 @@ def load_word_outcome_emotion_data(batch_size, embeddings,
     return dataset, loader
 
 def load_face_only_data(batch_size, faces_dir=FACE_ONLY_DIR):
-    img_transform = transforms.Compose([transforms.ToTensor()])
-    
+    img_transform = transforms.Compose([transforms.ToTensor()])    
     dataset = MultimodalDataset(img_dir=faces_dir, transform=img_transform)
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
+    return dataset, loader
 
 def load_word_only_data(batch_size, embeddings, csv_file=WORD_ONLY_PATH):
     img_transform = transforms.Compose([transforms.ToTensor()])
@@ -191,4 +191,5 @@ def load_word_only_data(batch_size, embeddings, csv_file=WORD_ONLY_PATH):
     dataset = MultimodalDataset(csv_file=WORD_ONLY_PATH, embeddings=embeddings)
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
+    return dataset, loader
 
