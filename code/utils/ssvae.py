@@ -19,7 +19,7 @@ def BernoulliMLP(in_dim, out_dim, hidden_dims, allow_broadcast, use_cuda):
 
 def NormalMLP(in_dim, out_dim, hidden_dims, allow_broadcast, use_cuda):
     """MLP that outputs the mean and variance of a Normal distribution."""
-    return MLP([in_dim] + hidden_dims + [out_dim, out_dim],
+    return MLP([in_dim] + hidden_dims + [[out_dim, out_dim]],
                activation=nn.ReLU,
                output_activation=[None, Exp],
                allow_broadcast=allow_broadcast,
@@ -66,27 +66,28 @@ class SSVAE(nn.Module):
         # encoder_y goes from inputs to outputs
         if output_dist == "normal":
             self.encoder_y =\
-                NormalMLP(input_size, hidden_layers, output_size, 
+                NormalMLP(input_size, output_size, hidden_layers, 
                           self.allow_broadcast, use_cuda)
         else:
             self.encoder_y =\
-                BernoulliMLP(input_size, hidden_layers, output_size, 
+                BernoulliMLP(input_size, output_size, hidden_layers, 
                              self.allow_broadcast, use_cuda)
             
         # encoder_z goes from [inputs, outputs] to z
-        self.encoder_z = NormalMLP(self.input_size + self.output_size,
-                                   self.hidden_layers, self.z_dim, 
-                                   self.allow_broadcast, self.use_cuda)
+        self.encoder_z =\
+            NormalMLP(input_size + output_size, z_dim, hidden_layers,
+                      self.allow_broadcast, self.use_cuda)
 
         # decoder goes from [z, outputs] to the inputs.
         if input_dist == "normal":
             self.decoder =\
-                NormalMLP(z_dim + output_size, hidden_layers[::-1],
-                          input_size, self.allow_broadcast, use_cuda)
+                NormalMLP(z_dim + output_size, input_size,
+                          hidden_layers[::-1], self.allow_broadcast, use_cuda)
         else:
             self.decoder =\
-                BernoulliMLP(z_dim + output_size, hidden_layers[::-1],
-                             input_size, self.allow_broadcast, use_cuda)
+                BernoulliMLP(z_dim + output_size, input_size,
+                             hidden_layers[::-1], self.allow_broadcast,
+                             use_cuda)
         
         # using GPUs for faster training of the networks
         if self.use_cuda:
@@ -118,6 +119,9 @@ class SSVAE(nn.Module):
             # sample the latent z from the (constant) prior, z ~ Normal(0,I)
             z_prior_mean  = torch.zeros(size=[batch_size, self.z_dim])
             z_prior_scale = torch.ones(size=[batch_size, self.z_dim])
+            if self.use_cuda:
+                z_prior_mean = z_prior_mean.cuda()
+                z_prior_scale = z_prior_scale.cuda()
             z_prior = dist.Normal(z_prior_mean, z_prior_scale).independent(1)
             with poutine.scale(scale=beta):
                 zs = pyro.sample("z", z_prior)
@@ -129,11 +133,16 @@ class SSVAE(nn.Module):
                 y_prior_mean *= self.output_prior[0]
                 y_prior_scale = torch.ones(size=[batch_size, self.output_size])
                 y_prior_scale *= self.output_prior[1]
+                if self.use_cuda:
+                    y_prior_mean = y_prior_mean.cuda()
+                    y_prior_scale = y_prior_scale.cuda()
                 y_prior = dist.Normal(y_prior_mean,
                                       y_prior_scale).independent(1)
             else:
                 y_prior_mean  = torch.ones(size=[batch_size, self.output_size])
                 y_prior_mean *= self.output_prior[0]
+                if self.use_cuda:
+                    y_prior_mean = y_prior_mean.cuda()
                 y_prior = dist.Bernoulli(y_prior_mean).independent(1)
             if ys is None:
                 ys = pyro.sample("y", y_prior)

@@ -166,7 +166,7 @@ class SSVAETrainable(tune.Trainable):
                      [False]*len(self.sup_loader) * self.config['unsup_ratio'])
         sup_flags = np.random.permutation(sup_flags)
         # Compute beta parameter for this epoch
-        beta_fn= self.config.get("beta_fn", lambda x : 1.0)
+        beta_fn = self.config.get("beta_fn", (lambda x : 1.0))
         beta = beta_fn(self.epochs)
         # Do a training epoch over each mini-batch
         for batch_num, is_supervised in enumerate(sup_flags):

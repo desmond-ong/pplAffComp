@@ -29,7 +29,7 @@ if __name__ == "__main__":
                 "z_dim": grid_search(range(10,31,5)),
                 "hidden_layers": [200],
                 "aux_loss_mult": 10, 
-                "beta_fn": lambda e : 1.0,
+                # "beta_fn": (lambda e : 1.0),
                 "embed_path": EMBED_PATH,
                 "normalize_embeddings": False,
                 "use_cuda": USE_CUDA,
