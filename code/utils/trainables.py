@@ -26,6 +26,17 @@ DEFAULT_EMBED_DIM = 50
 IMG_WIDTH = 64
 
 class MVAETrainable(tune.Trainable):
+    """Trainable for the MVAE. Relevant hyperparameters:
+
+    dataset -- either a "face" or "word" dataset
+    batch_size -- number of samples per batch
+    lr -- learning rate for Adam optimizer
+    z_dim -- number of latent dimensions
+    embed_path -- path to glove word embeddings (dimension is deduced)
+    normalize_embeddings -- whether to normalize word embeddings after loading
+    use_cuda -- whether to train using CUDA
+    """
+
     def _setup(self):
         self.epochs = 0
         # Clear previous pyro parameters
@@ -90,21 +101,36 @@ class MVAETrainable(tune.Trainable):
 
 
 class SSVAETrainable(tune.Trainable):
+    """Trainable for the SSVAE. Relevant hyperparameters:
+
+    dataset -- either a "face" or "word" dataset
+    batch_size -- number of samples per batch
+    unsup_ratio -- ratio of unsupervised to supervised batches
+    lr -- learning rate for Adam optimizer
+    z_dim -- number of latent dimensions
+    hidden_layers -- number of hidden layers and units, e.g. [100, 100]
+    aux_loss_mult -- multiplier for auxiliary loss
+    beta_fn -- annealing function for ELBO beta multiplier, epoch num is arg
+    embed_path -- path to glove word embeddings (dimension is deduced)
+    normalize_embeddings -- whether to normalize word embeddings after loading
+    use_cuda -- whether to train using CUDA
+    """
+    
     def _setup(self):
         self.epochs = 0
         # Clear previous pyro parameters
         pyro.clear_param_store()
         # Load the data
         if self.config['dataset'] == "face":
-            input_size = 100*100*3
             self.embeddings = None
             self.config['embed_dim'] = DEFAULT_EMBED_DIM
             self.sup_dataset, self.sup_loader =\
                 load_face_outcome_emotion_data(self.config['batch_size'])
             self.unsup_dataset, self.unsup_loader =\
                 load_face_only_data(self.config['batch_size'])
+            self.input_size = np.prod(self.sup_dataset.image_shape())
         elif self.config['dataset'] == "word":
-            self.embeddings, input_size = \
+            self.embeddings, self.input_size = \
                 load_embeddings(self.config['embed_path'],
                                 self.config['normalize_embeddings'])
             self.sup_dataset, self.sup_loader =\
@@ -114,7 +140,8 @@ class SSVAETrainable(tune.Trainable):
                 load_word_only_data(self.config['batch_size'],
                                     self.embeddings)
         # Setup the SSVAE
-        self.ssvae = SSVAE(output_size=EMOTION_VAR_DIM, input_size=input_size,
+        self.ssvae = SSVAE(output_size=EMOTION_VAR_DIM,
+                           input_size=self.input_size,
                            z_dim=self.config['z_dim'],
                            hidden_layers=self.config['hidden_layers'],
                            use_cuda=self.config['use_cuda'],
@@ -138,6 +165,9 @@ class SSVAETrainable(tune.Trainable):
         sup_flags = ([True]*len(self.sup_loader) +
                      [False]*len(self.sup_loader) * self.config['unsup_ratio'])
         sup_flags = np.random.permutation(sup_flags)
+        # Compute beta parameter for this epoch
+        beta_fn= self.config.get("beta_fn", lambda x : 1.0)
+        beta = beta_fn(self.epochs)
         # Do a training epoch over each mini-batch
         for batch_num, is_supervised in enumerate(sup_flags):
             if is_supervised:
@@ -158,10 +188,10 @@ class SSVAETrainable(tune.Trainable):
                     ys = ys.cuda()
             # Run optimization step
             if is_supervised:
-                sup_loss += self.loss.step(xs, ys)
+                sup_loss += self.loss.step(xs, ys, beta=beta)
                 sup_aux_loss += self.aux_loss.step(xs, ys)
             else:
-                unsup_loss += self.loss.step(xs)
+                unsup_loss += self.loss.step(xs, beta=beta)
                 unsup_aux_loss += self.aux_loss.step(xs)
         # Compute training loss
         n_sup = len(self.sup_dataset)

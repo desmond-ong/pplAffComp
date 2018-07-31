@@ -257,7 +257,7 @@ class SSVAE(nn.Module):
         """
         # This function assumes that x is a single vector, but since the
         # encoders and decoders take in batches, we have to resize x:
-        xs = x.view(1, EMBED_SIZE)
+        xs = x.view(1, self.input_size)
         if self.output_dist == "normal":
             y_mean, y_scale = self.encoder_y.forward(xs)
             y_dist = dist.Normal(y_mean, y_scale).independent(1)

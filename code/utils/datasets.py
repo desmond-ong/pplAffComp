@@ -41,9 +41,9 @@ class MultimodalDataset(Dataset):
                 on a sample.
         """
         if csv_file is None:
-            self.expdata = pd.DataFrame()
+            self.df = pd.DataFrame()
         else:
-            self.expdata = pd.read_csv(csv_file)
+            self.df = pd.read_csv(csv_file)
         self.embeddings = embeddings
         self.img_dir = img_dir
         self.transform = transform
@@ -57,19 +57,19 @@ class MultimodalDataset(Dataset):
         self.face_paths = []
         
         # Check if dataset has utterances
-        if "utterance" in self.expdata.columns and embeddings is not None:
+        if "utterance" in self.df.columns and embeddings is not None:
             self.has_utterances = True
         # Check if dataset has face images
-        if "facePath" in self.expdata.columns or img_dir is not None:
+        if "facePath" in self.df.columns or img_dir is not None:
             self.has_faces = True
-            if "facePath" not in self.expdata.columns:
+            if "facePath" not in self.df.columns:
                 self.only_faces = True                
         # Check if dataset has emotion ratings
-        if set(EMOTION_VAR_NAMES).issubset(self.expdata.columns):
+        if set(EMOTION_VAR_NAMES).issubset(self.df.columns):
             self.has_emotions = True
             self.normalize_emotions()
         # Check if dataset has outcomes
-        if set(OUTCOME_VAR_NAMES).issubset(self.expdata.columns):
+        if set(OUTCOME_VAR_NAMES).issubset(self.df.columns):
             self.has_outcomes = True
             self.normalize_outcomes()
 
@@ -83,24 +83,24 @@ class MultimodalDataset(Dataset):
                     self.face_paths.append(path)
             
     def __len__(self):
-        return len(self.expdata)
+        return len(self.df)
 
     def __getitem__(self, idx):
 
         if self.has_emotions:
-            emotions = np.array(self.expdata.iloc[idx]["happy":"disapp"],
+            emotions = np.array(self.df.iloc[idx]["happy":"disapp"],
                                 np.float32)
         else:
             emotions = 0
 
         if self.has_outcomes:
-            outcomes = np.array(self.expdata.iloc[idx]["payoff1":"angleProp"],
+            outcomes = np.array(self.df.iloc[idx]["payoff1":"angleProp"],
                                 np.float32)
         else:
             outcomes = 0
 
         if self.has_utterances:
-            word = self.expdata.iloc[idx]["utterance"]
+            word = self.df.iloc[idx]["utterance"]
             embed = self.embeddings[word]
         else:
             word = ""
@@ -110,9 +110,8 @@ class MultimodalDataset(Dataset):
             if self.only_faces:
                 img_name = self.face_paths[idx]
             else:
-                img_name = os.path.join(self.img_dir,
-                                        self.expdata.iloc[idx]["facePath"]
-                                        + ".png")
+                img_name = os.path.join(self.img_dir.
+                                        self.df.iloc[idx]["facePath"] + ".png")
             try:
                 image = Image.open(img_name).convert('RGB')
                 if self.transform:
@@ -124,7 +123,14 @@ class MultimodalDataset(Dataset):
             image = 0
             
         return word, embed, image, emotions, outcomes
-    
+
+    def image_shape(self):
+        """Returns shape of image."""
+        try:
+            return self.__getitem__(0)[2].shape
+        except:
+            return None
+            
     def normalize_outcomes(self):
         """Normalizes outcome data.
         
@@ -132,10 +138,10 @@ class MultimodalDataset(Dataset):
         need to normalize to [0,1] to match the rest of the variables,
         by dividing payoff1, payoff2, payoff3 and win by 100.
         """        
-        self.expdata.loc[:,"payoff1"] = self.expdata.loc[:,"payoff1"]/100
-        self.expdata.loc[:,"payoff2"] = self.expdata.loc[:,"payoff2"]/100
-        self.expdata.loc[:,"payoff3"] = self.expdata.loc[:,"payoff3"]/100
-        self.expdata.loc[:,"win"]     = self.expdata.loc[:,"win"]/100
+        self.df.loc[:,"payoff1"] = self.df.loc[:,"payoff1"]/100
+        self.df.loc[:,"payoff2"] = self.df.loc[:,"payoff2"]/100
+        self.df.loc[:,"payoff3"] = self.df.loc[:,"payoff3"]/100
+        self.df.loc[:,"win"]     = self.df.loc[:,"win"]/100
     
     def normalize_emotions(self):
         """Normalize emotion ratings.
@@ -143,8 +149,8 @@ class MultimodalDataset(Dataset):
         Emotions were rated on a 1-9 Likert scale.
         use emo <- (emo-1)/8 to transform to within [0,1]
         """
-        self.expdata.loc[:,"happy":"disapp"] = \
-            (self.expdata.loc[:,"happy":"disapp"]-1)/8
+        self.df.loc[:,"happy":"disapp"] = \
+            (self.df.loc[:,"happy":"disapp"]-1)/8
 
 
 def load_face_outcome_emotion_data(batch_size,
@@ -160,7 +166,6 @@ def load_face_outcome_emotion_data(batch_size,
         transforms.CenterCrop(64),
         transforms.ToTensor()
         ])
-
     # Reads in datafiles
     dataset = MultimodalDataset(csv_file=csv_file, img_dir=img_dir,
                                 transform=img_transform)
@@ -186,8 +191,6 @@ def load_face_only_data(batch_size, faces_dir=FACE_ONLY_DIR):
     return dataset, loader
 
 def load_word_only_data(batch_size, embeddings, csv_file=WORD_ONLY_PATH):
-    img_transform = transforms.Compose([transforms.ToTensor()])
-    
     dataset = MultimodalDataset(csv_file=WORD_ONLY_PATH, embeddings=embeddings)
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
