@@ -7,9 +7,10 @@ from ray.tune import register_trainable, run_experiments, grid_search
 
 from utils.trainables import SSVAETrainable
 
+CODE_DIR = os.path.dirname(os.path.abspath(__file__))
 NUM_GPUS = int(torch.cuda.device_count())
 USE_CUDA = torch.cuda.is_available()
-EMBED_PATH = os.path.join(os.path.abspath('..'), "glove", "glove.6B.50d.txt")
+EMBED_PATH = os.path.join(CODE_DIR, "..", "glove", "glove.6B.50d.txt")
 
 if __name__ == "__main__":
     ray.init(num_gpus=NUM_GPUS)

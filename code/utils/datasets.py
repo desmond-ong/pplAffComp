@@ -81,9 +81,14 @@ class MultimodalDataset(Dataset):
                         continue
                     path = os.path.join(root, fname)
                     self.face_paths.append(path)
-            
+            if len(self.face_paths) == 0:
+                self.has_faces = False
+                    
     def __len__(self):
-        return len(self.df)
+        if self.only_faces:
+            return len(self.face_paths)
+        else:
+            return len(self.df)
 
     def __getitem__(self, idx):
 
@@ -117,8 +122,7 @@ class MultimodalDataset(Dataset):
                 if self.transform:
                     image = self.transform(image)
             except:
-                print(img_name)
-                raise
+                raise FileNotFoundError(img_name)
         else:
             image = 0
             
@@ -169,6 +173,10 @@ def load_face_outcome_emotion_data(batch_size,
     # Reads in datafiles
     dataset = MultimodalDataset(csv_file=csv_file, img_dir=img_dir,
                                 transform=img_transform)
+    if not (dataset.has_faces and
+            dataset.has_emotions and
+            dataset.has_outcomes):
+        raise TypeError("Some modalities (face/emotion/outcome) are absent.")
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
 
@@ -178,6 +186,10 @@ def load_word_outcome_emotion_data(batch_size, embeddings,
                                    csv_file=WORD_OUTCOME_EMOTION_PATH):
     # Read in datafiles
     dataset = MultimodalDataset(csv_file=csv_file, embeddings=embeddings)
+    if not (dataset.has_utterances and
+            dataset.has_emotions and
+            dataset.has_outcomes):
+        raise TypeError("Some modalities (word/emotion/outcome) are absent.")
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
 
@@ -186,12 +198,16 @@ def load_word_outcome_emotion_data(batch_size, embeddings,
 def load_face_only_data(batch_size, faces_dir=FACE_ONLY_DIR):
     img_transform = transforms.Compose([transforms.ToTensor()])    
     dataset = MultimodalDataset(img_dir=faces_dir, transform=img_transform)
+    if not dataset.has_faces:
+        raise TypeError("Image directory does not contain any images.")
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
     return dataset, loader
 
 def load_word_only_data(batch_size, embeddings, csv_file=WORD_ONLY_PATH):
     dataset = MultimodalDataset(csv_file=WORD_ONLY_PATH, embeddings=embeddings)
+    if not dataset.has_utterances:
+        raise TypeError("CSV file does not contain any utterance data.")
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
     return dataset, loader
