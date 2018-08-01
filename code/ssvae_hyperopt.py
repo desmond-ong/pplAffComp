@@ -20,23 +20,23 @@ if __name__ == "__main__":
         "mvae_train": {
             "run": "ssvae_trainable",
             "stop": {
-                "training_iteration": 10000
+                "training_iteration": 1000
             },
             "config": {
                 "dataset": "word",
                 "batch_size": 32,
-                "unsup_ratio": 3,
+                "unsup_ratio": grid_search([1,2,3,4,5]),
                 "lr": grid_search([1e-4, 5e-5]),
-                "z_dim": grid_search(range(10,31,5)),
+                "z_dim": grid_search(range(10,26,5)),
                 "hidden_layers": [200],
-                "aux_loss_mult": 10, 
+                "aux_loss_mult": grid_search([1,3,10,30]), 
                 # "beta_fn": (lambda e : 1.0),
                 "embed_path": EMBED_PATH,
                 "normalize_embeddings": False,
                 "use_cuda": USE_CUDA,
             },
             "trial_resources": {"cpu": 2, "gpu": 1},
-            "checkpoint_freq": 1000,
+            "checkpoint_freq": 100,
         }
     },
     verbose=False)

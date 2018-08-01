@@ -100,8 +100,8 @@ class SSVAE(nn.Module):
         p(y)     = normal(.5, .2)   # Default prior on the outputs
         p(x|y,z) = normal(decoder(y,z))
 
-        :param xs: a batch of word embeddings
-        :param ys: (optional) a batch of emotion ratings.
+        :param xs: a batch of inputs
+        :param ys: (optional) a batch of outputs.
                    if ys is not provided, will treat as unsupervised,
                    sample from prior.
         :param beta: scale parameter that weights the KL divergence in the ELBO
@@ -174,8 +174,8 @@ class SSVAE(nn.Module):
         q(y|x)   = normal(encoder_y(x))  
         q(z|x,y) = normal(encoder_z(x,y)) 
 
-        :param xs: a batch of word vectors
-        :param ys: (optional) a batch of emotion ratings.
+        :param xs: a batch of inputs
+        :param ys: (optional) a batch of outputs.
                    if ys is not provided, will treat as unsupervised
         :param beta: not used here, but left to match 
                      the call signature of self.model()
@@ -204,7 +204,7 @@ class SSVAE(nn.Module):
             with poutine.scale(scale=beta): 
                 pyro.sample("z", dist.Normal(z_mean, z_scale).independent(1))
 
-    def model_rating(self, xs, ys=None, beta=None):
+    def model_aux(self, xs, ys=None, beta=None):
         """
         This model is used to add an auxiliary (supervised) loss as
         described in Kingma et al. (2014),
@@ -213,8 +213,8 @@ class SSVAE(nn.Module):
         This is to ensure that the model learns from the supervised examples.
         q(y|x) = normal(encoder_y(x))
         
-        :param xs:   word embedding
-        :param ys:   emotion rating
+        :param xs:   inputs
+        :param ys:   outputs
         :param beta: not used here, but left to match the call
                      signature of self.model()
         """
@@ -236,17 +236,17 @@ class SSVAE(nn.Module):
                 with pyro.poutine.scale(scale=self.aux_loss_multiplier):
                     pyro.sample("y_aux", y_dist, obs=ys)
 
-    def guide_rating(self, xs, ys=None, beta=None):
+    def guide_aux(self, xs, ys=None, beta=None):
         """
         Dummy guide function to accompany model_rating() in inference
-        This guide function is empty, because model_rating()
+        This guide function is empty, because model_aux()
         has no latent random variables
-        (i.e., model_rating() has no pyro.sample() calls that
+        (i.e., model_aux() has no pyro.sample() calls that
         are not conditioned on observations)
         """
         pass
     
-    def rate(self, xs):
+    def forward(self, xs):
         """
         Assign outputs (ys) to inputs (xs)
 
@@ -260,26 +260,55 @@ class SSVAE(nn.Module):
             y_mean = self.encoder_y.forward(xs)
         return y_mean
     
-    def reconstruct(self, x):
+    def reconstruct(self, xs, sample_y=False, sample_z=False):
         """
         A helper function for reconstructing the input.
         """
-        # This function assumes that x is a single vector, but since the
-        # encoders and decoders take in batches, we have to resize x:
-        xs = x.view(1, self.input_size)
+        # Encode the input
         if self.output_dist == "normal":
             y_mean, y_scale = self.encoder_y.forward(xs)
             y_dist = dist.Normal(y_mean, y_scale).independent(1)
         else:
             y_mean = self.encoder_y.forward(xs)
             y_dist = dist.Bernoulli(y_mean).independent(1)
-        ys = y_dist.sample()
+        if sample_y:
+            # Sample in output space
+            ys = y_dist.sample()
+        else:
+            ys = y_mean
         z_mean, z_scale = self.encoder_z.forward([xs, ys])
-        # Sample in latent space
-        zs = dist.Normal(z_mean, z_scale).sample()
-        # Decode the word
+        if sample_z:
+            # Sample in latent space
+            zs = dist.Normal(z_mean, z_scale).sample()
+        else:
+            zs = z_mean
+        # Decode the latent variables
         if self.input_dist == "normal":
             x_mean, x_scale = self.decoder.forward([zs, ys])
         else:
             x_mean = self.decoder.forward([zs, ys])
         return x_mean
+
+    def output_accuracy(self, xs, ys):
+        """Computes output accuracy on a batch."""
+        ys_hat = self.forward(xs).detach()
+        abs_error = torch.abs(ys - ys_hat)
+        accuracy = 1 - abs_error.mean()
+        return accuracy
+
+    def recon_accuracy(self, xs):
+        """Computes reconstruction accuracy on a batch."""
+        xs_hat = self.reconstruct(xs).detach().cpu()
+        abs_error = torch.abs(xs - xs_hat)
+        accuracy = 1 - abs_error.mean()
+        return accuracy
+
+    def recon_similarity(self, xs):
+        """Computes reconstruction cosine accuracy on a batch."""
+        xs_hat = self.reconstruct(xs).detach()
+        similarity = 0.0
+        for x, x_hat in zip(xs, xs_hat):
+            x, x_hat = x.view(-1), x_hat.view(-1)
+            similarity += torch.dot(x / x.norm(), x_hat / x_hat.norm())
+        similarity /= xs.shape[0]
+        return similarity

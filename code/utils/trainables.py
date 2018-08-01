@@ -151,7 +151,7 @@ class SSVAETrainable(tune.Trainable):
         # Setup the inference algorithm
         self.loss = SVI(self.ssvae.model, self.ssvae.guide,
                         optimizer, loss=Trace_ELBO())
-        self.aux_loss = SVI(self.ssvae.model_rating, self.ssvae.guide_rating,
+        self.aux_loss = SVI(self.ssvae.model_aux, self.ssvae.guide_aux,
                             optimizer, loss=Trace_ELBO())
                     
     def _train(self):
@@ -171,14 +171,14 @@ class SSVAETrainable(tune.Trainable):
         # Do a training epoch over each mini-batch
         for batch_num, is_supervised in enumerate(sup_flags):
             if is_supervised:
-                batch_data = next(sup_iter)
+                word, embed, image, emotions, outcomes = next(sup_iter)
             else:
-                batch_data = next(unsup_iter)
+                word, embed, image, emotions, outcomes = next(unsup_iter)
             # Extract the relevant modalities
             if self.config['dataset'] == "face":
-                xs, ys = batch_data[2], batch_data[3]
+                xs, ys = image, emotions
             elif self.config['dataset'] == "word":
-                xs, ys = batch_data[1], batch_data[3]
+                xs, ys = embed, emotions
             if len(ys.shape) == 1:
                 ys = None
             if self.config['use_cuda']:
@@ -203,8 +203,16 @@ class SSVAETrainable(tune.Trainable):
         mean_loss = (mean_sup_loss +
                      mean_sup_aux_loss * self.config['aux_loss_mult'] +
                      mean_unsup_loss * self.config['unsup_ratio'])
+        # Compute output and reconstruction accuracy
+        output_accuracy = self.output_accuracy()
+        # Compute (unsupervised) reconstruction accuracy
+        recon_accuracy = self.recon_accuracy()
         self.epochs += 1
+        # Report loss, output accuracy, and reconstruction accuracy
+        # Use episode reward mean so that recon accuarcy will be displayed
         return tune.TrainingResult(mean_loss=mean_loss,
+                                   mean_accuracy=output_accuracy,
+                                   episode_reward_mean=recon_accuracy,
                                    timesteps_this_iter=1)
 
     def _save(self, checkpoint_dir):
@@ -216,3 +224,45 @@ class SSVAETrainable(tune.Trainable):
     def _restore(self, checkpoint_path):
         pyro.get_param_store().load(checkpoint_path)
         pyro.module("ssvae", self.ssvae, update_module_params=True)
+
+    def output_accuracy(self, loader=None):
+        """Helper function to compute output accuracy."""
+        if loader is None:
+            loader = self.sup_loader
+        accuracy = 0.0
+        for batch_num, batch_data in enumerate(loader):
+            word, embed, image, emotions, outcomes = batch_data
+            batch_size = emotions.shape[0]
+            # Extract the relevant modalities
+            if self.config['dataset'] == "face":
+                xs, ys = image, emotions
+            elif self.config['dataset'] == "word":
+                xs, ys = embed, emotions
+            if self.config['use_cuda']:
+                # Store in CUDA memory
+                xs, ys = xs.cuda(), ys.cuda()
+            accuracy += self.ssvae.output_accuracy(xs, ys) * batch_size
+        accuracy /= len(loader.dataset)
+        return accuracy.cpu()
+
+    def recon_accuracy(self, loader=None):
+        """Helper function to compute reconstruction accuracy."""
+        if loader is None:
+            loader = self.unsup_loader
+        accuracy = 0.0
+        for batch_num, batch_data in enumerate(loader):
+            word, embed, image, emotions, outcomes = batch_data
+            if self.config['dataset'] == "face":
+                # Compute accuracy for face images
+                batch_size = image.shape[0]
+                if self.config['use_cuda']:
+                    image = image.cuda()
+                accuracy += self.ssvae.recon_accuracy(image) * batch_size
+            elif self.config['dataset'] == "word":
+                # Compute cosine similarity for word vectors
+                batch_size = embed.shape[0]
+                if self.config['use_cuda']:
+                    embed = embed.cuda()
+                accuracy += self.ssvae.recon_similarity(embed) * batch_size
+        accuracy /= len(loader.dataset)
+        return accuracy.cpu()
