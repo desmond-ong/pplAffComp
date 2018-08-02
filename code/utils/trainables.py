@@ -2,6 +2,7 @@
 import os
 
 from itertools import cycle
+import heapq
 import numpy as np
 
 import torch
@@ -17,7 +18,7 @@ from pyro.optim import Adam
 
 import ray.tune as tune
 
-from glove import load_embeddings
+from glove import load_embeddings, cosine_sim_np
 from datasets import *
 from mvae import MVAE
 from ssvae import SSVAE
@@ -266,3 +267,49 @@ class SSVAETrainable(tune.Trainable):
                 accuracy += self.ssvae.recon_similarity(embed) * batch_size
         accuracy /= len(loader.dataset)
         return accuracy.cpu().item()
+
+
+    def word_test(self, test_words=[], num_neighbors=4):
+        samples = []
+        # Lookup utterances in training set and testing set
+        df = self.sup_dataset.df
+        train_words = list(sorted(pd.unique(df.loc[:]["utterance"])))
+        all_words = list(pd.unique(self.unsup_dataset.df.loc[:]["utterance"]))
+        all_words = sorted(all_words + train_words)
+        # Lookup embeddings and emotions for each word
+        for w in test_words:
+            emotions = None
+            if w in train_words:
+                # Lookup emotion ratings if word is in training set
+                df_word = df[df['utterance']==w]
+                df_emotions =\
+                    df_word.loc[:,EMOTION_VAR_NAMES[0]:EMOTION_VAR_NAMES[-1]]
+                # Average across all observations
+                emotions = df_emotions.mean(axis=0).values
+            samples.append((w, self.embeddings[w], emotions))
+
+        print "Reconstruction similarity, neighbors and emotion ratings"
+        print "---"
+        for word, embed, emotions in samples:
+            # Reconstruct the embedding
+            embed_hat = self.ssvae.reconstruct(np.array([embed])).view(-1)
+            embed_hat = embed_hat.cpu().detach().numpy()
+            # Find cosine similarity
+            sim = self.ssvae.recon_similarity(np.array([embed]))
+            # Infer emotions
+            emotions_hat = self.ssvae.forward(np.array([embed]))
+            emotions_hat = emotions_hat.cpu().detach().numpy()
+            # Find neighboring words
+            if num_neighbors > 0:
+                nb_key = lambda w: cosine_sim_np(embed_hat, self.embeddings[w])
+                nb_words = heapq.nlargest(num_neighbors, all_words, key=nb_key)
+            # Print reconstruction similarity, neighbors and emotion ratings
+            print("{:8} : {:10}".format(word, sim))
+            if num_neighbors > 0:
+                print("neighbors: ", nb_words)
+            str_row_fmt ="{:<8.8} " * len(emotions_hat)
+            print str_row_fmt.format(*EMOTION_VAR_NAMES)
+            num_row_fmt ="{:<8.1f} " * len(emotions_hat)
+            if emotions is not None:
+                print num_row_fmt.format(*emotions)     
+            print num_row_fmt.format(*emotions_hat)
