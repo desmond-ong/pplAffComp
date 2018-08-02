@@ -243,7 +243,7 @@ class SSVAETrainable(tune.Trainable):
                 xs, ys = xs.cuda(), ys.cuda()
             accuracy += self.ssvae.output_accuracy(xs, ys) * batch_size
         accuracy /= len(loader.dataset)
-        return accuracy.cpu()
+        return accuracy.cpu().item()
 
     def recon_accuracy(self, loader=None):
         """Helper function to compute reconstruction accuracy."""
@@ -265,4 +265,4 @@ class SSVAETrainable(tune.Trainable):
                     embed = embed.cuda()
                 accuracy += self.ssvae.recon_similarity(embed) * batch_size
         accuracy /= len(loader.dataset)
-        return accuracy.cpu()
+        return accuracy.cpu().item()

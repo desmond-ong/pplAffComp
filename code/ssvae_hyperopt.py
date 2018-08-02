@@ -17,19 +17,19 @@ if __name__ == "__main__":
     register_trainable("ssvae_trainable", SSVAETrainable)
     run_experiments(
     {
-        "mvae_train": {
+        "ssvae_train": {
             "run": "ssvae_trainable",
             "stop": {
-                "training_iteration": 1000
+                "training_iteration": 5000
             },
             "config": {
                 "dataset": "word",
                 "batch_size": 32,
-                "unsup_ratio": grid_search([1,2,3,4,5]),
-                "lr": grid_search([1e-4, 5e-5]),
-                "z_dim": grid_search(range(10,26,5)),
+                "unsup_ratio": grid_search([5,7,9]),
+                "lr": grid_search([1e-4, 5e-4]),
+                "z_dim": 15,
                 "hidden_layers": [200],
-                "aux_loss_mult": grid_search([1,3,10,30]), 
+                "aux_loss_mult": grid_search([10,20,30]), 
                 # "beta_fn": (lambda e : 1.0),
                 "embed_path": EMBED_PATH,
                 "normalize_embeddings": False,
