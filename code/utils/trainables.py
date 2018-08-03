@@ -279,6 +279,8 @@ class SSVAETrainable(tune.Trainable):
             test_words = train_words
         # Lookup embeddings and emotions for each word
         for w in test_words:
+            if w not in self.embeddings:
+                continue
             emotions = None
             if w in train_words:
                 # Lookup emotion ratings if word is in training set
