@@ -269,13 +269,14 @@ class SSVAETrainable(tune.Trainable):
         return accuracy.cpu().item()
 
 
-    def word_test(self, test_words=[], num_neighbors=4):
+    def word_test(self, test_words=None, num_neighbors=4):
         samples = []
         # Lookup utterances in training set and testing set
         df = self.sup_dataset.df
         train_words = list(sorted(pd.unique(df.loc[:]["utterance"])))
         all_words = list(pd.unique(self.unsup_dataset.df.loc[:]["utterance"]))
-        all_words = sorted(all_words + train_words)
+        if test_words is None:
+            test_words = train_words
         # Lookup embeddings and emotions for each word
         for w in test_words:
             emotions = None
@@ -291,13 +292,17 @@ class SSVAETrainable(tune.Trainable):
         print "Reconstruction similarity, neighbors and emotion ratings"
         print "---"
         for word, embed, emotions in samples:
+            # Convert input to torch tensor and reshape as batch
+            embed = torch.tensor([embed])
+            if self.config['use_cuda']:
+                embed = embed.cuda()
             # Reconstruct the embedding
-            embed_hat = self.ssvae.reconstruct(np.array([embed])).view(-1)
+            embed_hat = self.ssvae.reconstruct(embed).view(-1)
             embed_hat = embed_hat.cpu().detach().numpy()
             # Find cosine similarity
-            sim = self.ssvae.recon_similarity(np.array([embed]))
+            sim = self.ssvae.recon_similarity(embed)
             # Infer emotions
-            emotions_hat = self.ssvae.forward(np.array([embed]))
+            emotions_hat = self.ssvae.forward(embed).view(-1)
             emotions_hat = emotions_hat.cpu().detach().numpy()
             # Find neighboring words
             if num_neighbors > 0:
@@ -309,7 +314,7 @@ class SSVAETrainable(tune.Trainable):
                 print("neighbors: ", nb_words)
             str_row_fmt ="{:<8.8} " * len(emotions_hat)
             print str_row_fmt.format(*EMOTION_VAR_NAMES)
-            num_row_fmt ="{:<8.1f} " * len(emotions_hat)
+            num_row_fmt ="{:<8.3f} " * len(emotions_hat)
             if emotions is not None:
                 print num_row_fmt.format(*emotions)     
             print num_row_fmt.format(*emotions_hat)
