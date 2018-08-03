@@ -4,6 +4,7 @@ import os
 from itertools import cycle
 import heapq
 import numpy as np
+from scipy.special import expit
 
 import torch
 import torch.nn as nn
@@ -167,7 +168,9 @@ class SSVAETrainable(tune.Trainable):
                      [False]*len(self.sup_loader) * self.config['unsup_ratio'])
         sup_flags = np.random.permutation(sup_flags)
         # Compute beta parameter for this epoch
-        beta_fn = self.config.get("beta_fn", (lambda x : 1.0))
+        beta_fn = self.config.get("beta_fn",
+                                  (lambda x :
+                                   float(expit(0.01*(self.epoch-800)))))
         beta = beta_fn(self.epochs)
         # Do a training epoch over each mini-batch
         for batch_num, is_supervised in enumerate(sup_flags):
