@@ -12,6 +12,9 @@ FACE_ONLY_DIR = os.path.join(UTILS_DIR, "..", "..",
                              "CognitionData", "more_faces")
 WORD_ONLY_PATH = os.path.join(UTILS_DIR, "..", "..",
                               "CognitionData", "more_utterances.csv")
+WORD_EMOTION_PATH = os.path.join(UTILS_DIR, "..", "..",
+                                 "CognitionData",
+                                 "dataSecondExpt_utteranceOnly.csv")
 FACE_OUTCOME_EMOTION_PATH = os.path.join(UTILS_DIR, "..", "..",
                                          "CognitionData", "data_faceWheel.csv")
 WORD_OUTCOME_EMOTION_PATH = os.path.join(UTILS_DIR, "..", "..",
@@ -179,7 +182,6 @@ def load_face_outcome_emotion_data(batch_size,
         raise TypeError("Some modalities (face/emotion/outcome) are absent.")
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
-
     return dataset, loader
 
 def load_word_outcome_emotion_data(batch_size, embeddings,
@@ -192,7 +194,17 @@ def load_word_outcome_emotion_data(batch_size, embeddings,
         raise TypeError("Some modalities (word/emotion/outcome) are absent.")
     loader = DataLoader(dataset, batch_size=batch_size,
                         shuffle=True, num_workers=4, pin_memory=True)
+    return dataset, loader
 
+def load_word_emotion_data(batch_size, embeddings,
+                           csv_file=WORD_EMOTION_PATH):
+    # Read in datafiles
+    dataset = MultimodalDataset(csv_file=csv_file, embeddings=embeddings)
+    if not (dataset.has_utterances and
+            dataset.has_emotions):
+        raise TypeError("Some modalities (word/emotion/outcome) are absent.")
+    loader = DataLoader(dataset, batch_size=batch_size,
+                        shuffle=True, num_workers=4, pin_memory=True)
     return dataset, loader
 
 def load_face_only_data(batch_size, faces_dir=FACE_ONLY_DIR):

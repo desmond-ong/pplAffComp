@@ -136,10 +136,10 @@ class SSVAETrainable(tune.Trainable):
                 load_embeddings(self.config['embed_path'],
                                 self.config['normalize_embeddings'])
             self.sup_dataset, self.sup_loader =\
-                load_word_outcome_emotion_data(self.config['batch_size'],
-                                               self.embeddings)
+                load_word_emotion_data(self.config['batch_size'],
+                                       self.embeddings)
             self.unsup_dataset, self.unsup_loader =\
-                load_word_only_data(self.config['batch_size'],
+                load_word0only_data(self.config['batch_size'],
                                     self.embeddings)
         # Setup the SSVAE
         self.ssvae = SSVAE(output_size=EMOTION_VAR_DIM,
