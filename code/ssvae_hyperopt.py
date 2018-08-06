@@ -20,13 +20,13 @@ if __name__ == "__main__":
         "ssvae_train": {
             "run": "ssvae_trainable",
             "stop": {
-                "training_iteration": 5000
+                "training_iteration": 2500
             },
             "config": {
                 "dataset": "word",
                 "batch_size": 32,
-                "unsup_ratio": grid_search([5,7,9]),
-                "lr": grid_search([1e-4, 5e-4]),
+                "unsup_ratio": 1,
+                "lr": 5e-4,
                 "z_dim": 15,
                 "hidden_layers": [200],
                 "aux_loss_mult": grid_search([10,20,30]), 

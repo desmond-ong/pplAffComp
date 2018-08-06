@@ -170,7 +170,7 @@ class SSVAETrainable(tune.Trainable):
         # Compute beta parameter for this epoch
         beta_fn = self.config.get("beta_fn",
                                   (lambda x :
-                                   float(expit(0.01*(self.epoch-800)))))
+                                   float(expit(0.01*(self.epochs-800)))))
         beta = beta_fn(self.epochs)
         # Do a training epoch over each mini-batch
         for batch_num, is_supervised in enumerate(sup_flags):
