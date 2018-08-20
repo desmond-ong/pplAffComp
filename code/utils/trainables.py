@@ -111,6 +111,7 @@ class SSVAETrainable(tune.Trainable):
     lr -- learning rate for Adam optimizer
     z_dim -- number of latent dimensions
     hidden_layers -- number of hidden layers and units, e.g. [100, 100]
+    perturb_scale -- how much to perturb inputs to improve generalization
     aux_loss_mult -- multiplier for auxiliary loss
     beta_fn -- annealing function for ELBO beta multiplier, epoch num is arg
     embed_path -- path to glove word embeddings (dimension is deduced)
@@ -185,6 +186,10 @@ class SSVAETrainable(tune.Trainable):
                 xs, ys = embed, emotions
             if len(ys.shape) == 1:
                 ys = None
+            if self.config['perturb_scale'] > 0:
+                # Perturb inputs using Gaussian noise
+                perturb_dist = dist.Normal(1.0, self.config['perturb_scale'])
+                xs *= perturb_dist(xs.shape)
             if self.config['use_cuda']:
                 # Store in CUDA memory
                 xs = xs.cuda()
