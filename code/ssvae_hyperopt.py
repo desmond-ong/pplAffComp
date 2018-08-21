@@ -29,7 +29,7 @@ if __name__ == "__main__":
                 "lr": 5e-4,
                 "z_dim": 15,
                 "hidden_layers": [200],
-                "perturb_scale": grid_search([0.03, 0.1, 0.3]),
+                "perturb_scale": grid_search([0.1, 0.3, 0.5]),
                 "aux_loss_mult": 20, 
                 # "beta_fn": (lambda e : 1.0),
                 "embed_path": EMBED_PATH,

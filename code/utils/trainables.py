@@ -186,7 +186,7 @@ class SSVAETrainable(tune.Trainable):
                 xs, ys = embed, emotions
             if len(ys.shape) == 1:
                 ys = None
-            if self.config['perturb_scale'] > 0:
+            if is_supervised and self.config['perturb_scale'] > 0:
                 # Perturb inputs using Gaussian noise
                 perturb_dist = dist.Normal(1.0, self.config['perturb_scale'])
                 xs *= perturb_dist(xs.shape)
