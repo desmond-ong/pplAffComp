@@ -2,10 +2,17 @@
 
 Presenter: [Desmond C. Ong](https://web.stanford.edu/~dco)
 
-Contributors: [Desmond C. Ong](https://web.stanford.edu/~dco), Zhi-Xuan Tan, Harold Soh, Jamil Zaki, & Noah D. Goodman.
+Contributors:
+
+- [Desmond C. Ong](https://web.stanford.edu/~dco), National University of Singapore (NUS) & Agency for Science, Technology and Research (A\*STAR)
+- Zhi-Xuan Tan, Agency for Science, Technology and Research (A\*STAR); now at Massachusetts Institute of Technology (MIT)
+- [Harold Soh](https://haroldsoh.com/), National University of Singapore (NUS)
+- [Jamil Zaki](http://ssnl.stanford.edu/people), Stanford University
+- [Noah D. Goodman](http://cocolab.stanford.edu/ndg.html), Stanford University
+
 
 ### Preamble:
-This [tutorial](https://desmond-ong.github.io/pplAffComp) will be taught at <i>[Affective Computing and Intelligent Interaction 2019](http://acii-conf.org/2019/)</i>, in September 2019 in Cambridge, UK. This tutorial is in turn based off material introduced in the following paper:
+This [tutorial](https://desmond-ong.github.io/pplAffComp) will be taught at <i>[Affective Computing and Intelligent Interaction 2019](http://acii-conf.org/2019/tutorials_accepted/)</i>, in September 2019 in Cambridge, UK. This tutorial is in turn based off material introduced in the following paper:
 
 Ong, D. C., Soh, H., Zaki, J., & Goodman, N. D. (in press). Applying Probabilistic Programming to Affective Computing. <i>IEEE Transactions on Affective Computing</i> <br> [ [arXiv](https://arxiv.org/abs/1903.06445) ]
 
