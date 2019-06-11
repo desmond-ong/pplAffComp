@@ -26,28 +26,15 @@ You should see `(env)` before your command prompt to indicate that you are worki
 To install the required packages:
 
 ```
-pip install -r requirements.txt
-```
-
---- 
-
-# Installing Pyro
-
-At the current time of writing, the latest release of Pyro is 0.2.1. However, the tutorial uses features in the [/dev branch](https://github.com/uber/pyro) (i.e., the development version of Pyro which may become a later release), so we will be installing Pyro directly from dev.
-
-Make sure you have your environment activated, then type:
-
-```
-git clone https://github.com/uber/pyro
-cd pyro
-pip install .
+pip install jupyter torch torchvision pyro-ppl
 ```
 
 To test if Pyro has been installed properly, start a Python shell by typing:
 
 ```
 python
-import pyro
+> import pyro
+> print pyro.__version__
 ```
 
 If it doesn't throw an error, then Pyro has been installed properly. Type ```quit()``` to return to the command prompt.
