@@ -34,7 +34,7 @@ We will be learning from a webbook, using Jupyter notebooks. We will start with 
 ## Table of Contents
 
 
-- [Getting Started](gettingStarted.md)
+- If you want to set up Pyro and this tutorial code on your laptop, refer to: [Getting Started](https://github.com/desmond-ong/pplAffComp/blob/master/gettingStarted.md). Otherwise, we'll be using Google Colab which will let you run all the pyro code in the browser!
 - Introduction to Probabilistic Programming (Taken from the Pyro tutorials)
     - Intro to Pyro [Part 1](http://pyro.ai/examples/intro_part_i.html) and [Part 2](http://pyro.ai/examples/intro_part_ii.html).
     - [Intro to Variational Inference](http://pyro.ai/examples/svi_part_i.html)
@@ -44,9 +44,9 @@ We will be learning from a webbook, using Jupyter notebooks. We will start with 
 
 Affective Computing relevant examples:
 
-- [Example 1: Linear Regression](code/LinearRegression.ipynb) as a model of Appraisal.
-- [Example 2: Variational Autoencoder](code/VAE.ipynb) to generate emotional faces
-- [Example 3: Semi-supervised VAE](code/SemiSupervisedVAE.ipynb) to learn to recognize emotions from faces
+- Example 1: Linear Regression as a model of Appraisal. [Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_1_LinearRegression.ipynb)
+- Example 2: Variational Autoencoder to generate emotional faces [Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_2_VAE.ipynb)
+- Example 3: Semi-supervised VAE to learn to recognize emotions from faces [Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_3_SSVAE.ipynb)
 - Example 4: Multimodal VAE to model latent affect (Under construction! Will be up soon)
 
 
