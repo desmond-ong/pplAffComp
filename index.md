@@ -50,6 +50,9 @@ Affective Computing relevant examples:
 - Example 4: Multimodal VAE to model latent affect (Under construction! Will be up soon)
 
 
+(These examples were tested on Pyro version 0.3.3)
+
+
 ---
 ### Links to External Resources
 
