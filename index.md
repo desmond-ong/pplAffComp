@@ -1,5 +1,6 @@
 ---
 layout: single
+classes: wide
 title: Integrating Theory-Driven and Data-Driven Approaches to Affective Computing via Deep Probabilistic Programming
 ---
 
