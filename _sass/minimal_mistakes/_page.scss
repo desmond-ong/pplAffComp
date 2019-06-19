@@ -21,7 +21,7 @@
 
 .page {
   @include breakpoint($large) {
-    float: right;
+    float: center;
     width: 100%;
   }
 
