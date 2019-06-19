@@ -3,3 +3,5 @@ remote_theme: "mmistakes/minimal-mistakes@4.16.4"
 plugins:
   - jekyll-include-cache
 
+masthead_title: "Applying Probablistic Programming to Affective Computing"
+
