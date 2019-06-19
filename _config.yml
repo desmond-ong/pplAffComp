@@ -1,1 +1,5 @@
-theme: jekyll-theme-tactile
+remote_theme: "mmistakes/minimal-mistakes@4.16.4"
+
+plugins:
+  - jekyll-include-cache
+
