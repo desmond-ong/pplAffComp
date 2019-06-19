@@ -1,5 +1,5 @@
 ---
-layout: home
+layout: single
 title: Integrating Theory-Driven and Data-Driven Approaches to Affective Computing via Deep Probabilistic Programming
 ---
 
