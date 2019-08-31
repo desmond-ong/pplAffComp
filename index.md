@@ -53,7 +53,8 @@ Affective Computing relevant examples:
 
 - Example 1 [[Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_1_LinearRegression.ipynb)]: Linear Regression as a model of Appraisal.
 - Example 2 [[Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_2_VAE.ipynb)]: Variational Autoencoder to generate emotional faces.
-- Example 3 [[Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_3_SSVAE.ipynb)]: Semi-supervised VAE to learn to recognize emotions from faces.
+<!-- - Example 3 [[Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_3_SSVAE.ipynb)]: Semi-supervised VAE to learn to recognize emotions from faces. -->
+- Example 3 Colab Notebook: Semi-supervised VAE to learn to recognize emotions from faces. (Currently buggy, sorry!)
 - Example 4 [[Colab Notebook](https://colab.research.google.com/github/desmond-ong/pplAffComp/blob/master/Colab/PPLTutorial_4_MVAE.ipynb)]: Multimodal VAE to model latent affect.
 
 
