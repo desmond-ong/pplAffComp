@@ -11,6 +11,10 @@ This [tutorial](https://desmond-ong.github.io/pplAffComp) will be taught at <i>[
 Ong, D. C., Soh, H., Zaki, J., & Goodman, N. D. (in press). Applying Probabilistic Programming to Affective Computing. <i>IEEE Transactions on Affective Computing</i> <br> [ [arXiv](https://arxiv.org/abs/1903.06445) ]
 
 
+Tutorial Details.
+
+- Location: Computer Laboratory, University of Cambridge. William Gates Building, 15 JJ Thomson Ave.
+- Date and Time: Tuesday 3 September 2019, 9am-12pm.
 
 
 Presenter: [Desmond C. Ong](https://web.stanford.edu/~dco)
@@ -35,6 +39,7 @@ The target audience comprises two groups of researchers. The first group include
 
 We will be learning from a webbook, using Jupyter notebooks. We will start with introductory primers to probabilistic programming concepts, such as stochastic primitives; compositionality and recursion; and stochastic variational inference. We will then transition into worked examples on previously-collected affective computing datasets. We will be using the open-sourced deep probabilistic programming language [Pyro](https://pyro.ai), first released in 2017. Tutorial participants will be able to download and run the code on their local machines as they follow along the material. We hope that by the end of this short tutorial, participants will be inspired&mdash;and equipped with some basic skills&mdash;to adopt approaches like deep probabilistic programming that merge theory- and data-driven approaches, and that such efforts will lead to greater collaboration between these historically-distinct paradigms in affective computing.
 
+_Edit_: We will now be using Google Colaboratory (Colab), which provides a Jupyter environment on the cloud, hosted by Google. This means that participants do not need to download any code onto their computers to follow along.
 
 
 
