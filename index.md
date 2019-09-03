@@ -6,7 +6,7 @@ title: Integrating Theory-Driven and Data-Driven Approaches to Affective Computi
 
 
 ### Preamble:
-This [tutorial](https://desmond-ong.github.io/pplAffComp) will be taught at <i>[Affective Computing and Intelligent Interaction 2019](http://acii-conf.org/2019/tutorials_accepted/)</i>, in September 2019 in Cambridge, UK. This tutorial is in turn based off material introduced in the following paper:
+This [tutorial](https://desmond-ong.github.io/pplAffComp) was taught at <i>[Affective Computing and Intelligent Interaction 2019](http://acii-conf.org/2019/tutorials_accepted/)</i>, in September 2019 in Cambridge, UK. This tutorial is in turn based off material introduced in the following paper:
 
 Ong, D. C., Soh, H., Zaki, J., & Goodman, N. D. (in press). Applying Probabilistic Programming to Affective Computing. <i>IEEE Transactions on Affective Computing</i> <br> [ [arXiv](https://arxiv.org/abs/1903.06445) ]
 
@@ -15,7 +15,7 @@ Tutorial Details.
 
 - Location: Computer Laboratory, University of Cambridge. William Gates Building, 15 JJ Thomson Ave.
 - Date and Time: Tuesday 3 September 2019, 9am-12pm.
-
+- Download the [slides](Tutorial/ACII_Tutorial_2019_slides.pdf) presented during the tutorial session.
 
 Presenter: [Desmond C. Ong](https://web.stanford.edu/~dco)
 
