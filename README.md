@@ -1,5 +1,7 @@
 # Applying Probabilistic Programming to Affective Computing
 
+Head to [https://desmond-ong.github.io/pplAffComp/](https://desmond-ong.github.io/pplAffComp/) for a formatted (and updated) landing page.
+
 This code repository contains example code to accompany "Applying Probabilistic Programming to Affective Computing" by Desmond C. Ong, Harold Soh, Jamil Zaki, and Noah D. Goodman (submitted).
 
 
